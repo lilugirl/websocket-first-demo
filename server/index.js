@@ -20,12 +20,11 @@ wss.on('connection', function connection(ws) {
 
       // 判断非自己的客户端才发送
       if (ws !== client && client.readyState === WebSocket.OPEN) {
-        client.send('Server:' + msg)
+        client.send(msg)
       }
 
     })
   })
 
-  // 主动发送消息给客户端
-  ws.send('Message from server')
+
 })

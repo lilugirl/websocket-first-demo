@@ -11,15 +11,22 @@
 
 <body>
   <div id="app">
-    <ul v-if="lists">
-      <li v-for="(item,index) in lists" :key="'message'+index">{{item}}</li>
-    </ul>
-    <div class="ctrl">
-      <!--输入框-->
-      <input type="text" id="msg" v-model="message">
+    <div v-if="isShow">
+      <input type="text" v-model="name">
+      <button type="button" @click="enter()">进入聊天室</button>
+    </div>
 
-      <button type="button" @click="send()">发送</button>
-      <button type="button" @click="close()">关闭websocket</button>
+    <div v-else>
+      <ul v-if="lists">
+        <li v-for="(item,index) in lists" :key="'message'+index">{{item}}</li>
+      </ul>
+      <div class="ctrl">
+        <!--输入框-->
+        <input type="text" id="msg" v-model="message">
+
+        <button type="button" @click="send()">发送</button>
+        <button type="button" @click="close()">关闭websocket</button>
+      </div>
     </div>
   </div>
 
@@ -27,9 +34,11 @@
     var app = new Vue({
       el: '#app',
       data: {
+        name: '',
         message: '',
         lists: [],
-        ws: {}
+        ws: {},
+        isShow: true,
       },
       mounted() {
         this.ws = new WebSocket('ws://127.0.0.1:3000');
@@ -44,9 +53,18 @@
           //ws.send('Hello from client!')
         },
         onMessage: function (event) {
+          // 接收服务端发送过来的蛾消息
+          var obj = JSON.parse(event.data)
+          if (obj.event === 'enter') {
+            // 当又一个新的用户进入聊天室时
+            this.lists.push('欢迎：' + obj.message + '加入聊天室')
+          } else {
+            //接收正常的聊天
+            this.lists.push(obj.message)
+          }
           console.log('message:' + this.ws.readyState)
           console.log(event.data)
-          this.lists.push(event.data)
+
         },
         onClose: function () {
           console.log('close:' + this.ws.readyState);
@@ -59,12 +77,29 @@
         //发送消息
         send: function () {
           this.lists.push(this.message);
-          this.ws.send(this.message)
+          this.ws.send(JSON.stringify({
+            event: 'message',
+            message: this.message
+          }))
           this.message = ''
 
         },
         close: function () {
+
           this.ws.close();
+        },
+
+        enter: function () {
+          if (this.name.trim() === '') {
+            alert('用户名不得为空')
+            return
+          }
+          this.isShow = false;
+          this.ws.send(JSON.stringify({
+            event: 'enter',
+            message: this.name
+          }))
+
         }
       }
     })
