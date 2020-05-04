@@ -8,4 +8,7 @@ ws.on('open', function () {
   ws.on('message', function (msg) {
     console.log(msg)
   })
+
+
+
 })

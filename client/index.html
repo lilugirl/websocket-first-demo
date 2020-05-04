@@ -8,14 +8,35 @@
 </head>
 
 <body>
+
+  <button type="button" id="app">按钮</button>
   <script>
     var ws = new WebSocket('ws://127.0.0.1:3000')
+
+    document.getElementById('app').addEventListener('click', function () {
+      ws.close()
+    })
+
     ws.onopen = function () {
+      console.log('open:' + ws.readyState)
       ws.send('Hello from client!')
     }
 
     ws.onmessage = function (event) {
+      console.log('message:' + ws.readyState)
       console.log(event.data)
+    }
+
+    // 当链接主动断开时触发close事件
+    ws.onclose = function () {
+      console.log('close:' + ws.readyState);
+      console.log('已关闭websocket')
+    }
+
+    // 当连接失败时 触发error事件
+    ws.onerror = function () {
+      console.log('error:' + ws.readyState);
+      console.log('websocket连接失败')
     }
   </script>
 </body>
