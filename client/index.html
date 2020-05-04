@@ -5,39 +5,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
+  <script crossorigin="anonymous" integrity="sha384-OZmxTjkv7EQo5XDMPAmIkkvywVeXw59YyYh6zq8UKfkbor13jS+5p8qMTBSA1q+F"
+    src="https://lib.baomitu.com/vue/2.6.11/vue.min.js"></script>
 </head>
 
 <body>
+  <div id="app">
+    <ul v-if="lists">
+      <li v-for="(item,index) in lists" :key="'message'+index">{{item}}</li>
+    </ul>
+    <div class="ctrl">
+      <!--输入框-->
+      <input type="text" id="msg" v-model="message">
 
-  <button type="button" id="app">按钮</button>
+      <button type="button" @click="send()">发送</button>
+      <button type="button" @click="close()">关闭websocket</button>
+    </div>
+  </div>
+
   <script>
-    var ws = new WebSocket('ws://127.0.0.1:3000')
+    var app = new Vue({
+      el: '#app',
+      data: {
+        message: '',
+        lists: [],
+        ws: {}
+      },
+      mounted() {
+        this.ws = new WebSocket('ws://127.0.0.1:3000');
+        this.ws.onopen = this.onOpen;
+        this.ws.onmessage = this.onMessage;
+        this.ws.onclose = this.onClose; //  当链接主动断开时触发close事件
+        this.ws.onerror = this.onError; // 当连接失败时 触发error事件
+      },
+      methods: {
+        onOpen: function () {
+          console.log('open:' + this.ws.readyState)
+          //ws.send('Hello from client!')
+        },
+        onMessage: function (event) {
+          console.log('message:' + this.ws.readyState)
+          console.log(event.data)
+          this.lists.push(event.data)
+        },
+        onClose: function () {
+          console.log('close:' + this.ws.readyState);
+          console.log('已关闭websocket')
+        },
+        onError: function () {
+          console.log('error:' + this.ws.readyState);
+          console.log('websocket连接失败')
+        },
+        //发送消息
+        send: function () {
+          this.lists.push(this.message);
+          this.ws.send(this.message)
+          this.message = ''
 
-    document.getElementById('app').addEventListener('click', function () {
-      ws.close()
+        },
+        close: function () {
+          this.ws.close();
+        }
+      }
     })
-
-    ws.onopen = function () {
-      console.log('open:' + ws.readyState)
-      ws.send('Hello from client!')
-    }
-
-    ws.onmessage = function (event) {
-      console.log('message:' + ws.readyState)
-      console.log(event.data)
-    }
-
-    // 当链接主动断开时触发close事件
-    ws.onclose = function () {
-      console.log('close:' + ws.readyState);
-      console.log('已关闭websocket')
-    }
-
-    // 当连接失败时 触发error事件
-    ws.onerror = function () {
-      console.log('error:' + ws.readyState);
-      console.log('websocket连接失败')
-    }
   </script>
 </body>
 
