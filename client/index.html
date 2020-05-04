@@ -10,6 +10,13 @@
 <body>
   <script>
     var ws = new WebSocket('ws://127.0.0.1:3000')
+    ws.onopen = function () {
+      ws.send('Hello from client!')
+    }
+
+    ws.onmessage = function (event) {
+      console.log(event.data)
+    }
   </script>
 </body>
 
