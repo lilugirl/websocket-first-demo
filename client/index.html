@@ -12,7 +12,8 @@
 <body>
   <div id="app">
     <div v-if="isShow">
-      <input type="text" v-model="name">
+      <p>昵称：<input type="text" v-model="name"></p>
+      <p>房间号：<input type="text" v-model="roomid"></p>
       <button type="button" @click="enter()">进入聊天室</button>
     </div>
 
@@ -40,7 +41,8 @@
         lists: [],
         ws: {},
         isShow: true,
-        num: 0
+        num: 0,
+        roomid: ''
       },
       mounted() {
         this.ws = new WebSocket('ws://127.0.0.1:3000');
@@ -64,7 +66,7 @@
           var obj = JSON.parse(event.data)
           if (obj.event === 'enter') {
             // 当又一个新的用户进入聊天室时
-            this.lists.push('欢迎：' + obj.message + '加入聊天室')
+            this.lists.push('欢迎：' + obj.message + '加入聊天室 房间' + obj.roomid)
           } else if (obj.event === 'out') {
             this.lists.push(obj.name + "已经退出了聊天室")
 
@@ -111,7 +113,8 @@
           this.isShow = false;
           this.ws.send(JSON.stringify({
             event: 'enter',
-            message: this.name
+            message: this.name,
+            roomid: this.roomid
           }))
 
         }
